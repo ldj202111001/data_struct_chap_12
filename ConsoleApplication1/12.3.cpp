@@ -53,7 +53,7 @@ void insert_edge2(int u, int v, int val)
 
 #define INF 9999
 
-void load_wgraph(char* filename) // 12.1
+void load_wgraph(const char* filename) // 12.1
 {
     int i, j, val, n;
     char str[80];
@@ -62,16 +62,21 @@ void load_wgraph(char* filename) // 12.1
     {
         init_graph();
         fscanf(fp, "%d", &n);
-        insert_vertex(str[0]);
-        for (j = 0; j < n; j++)
+        for (i = 0; i < n; i++)
         {
-            fscanf(fp, "%d", &val);
-            if (i != j && val == 0)
-                adj[i][j] = INF;
-            else adj[i][j] = val;
+            fscanf(fp, "%s", str);
+            insert_vertex(str[0]);
+            for (j = 0; j < n; j++)
+            {
+                fscanf(fp, "%d", &val);
+                if (i != j && val == 0)
+                    adj[i][j] = INF;
+                else adj[i][j] = val;
+            }
         }
+        fclose(fp);
     }
-    fclose(fp);
+    
 }
 
 // Union-Find 연산 관련 코드
@@ -108,9 +113,6 @@ typedef struct HeapNode { // 힙에 저장할 항목의 자료형
 } HNode;
 
 #define Key(n) (n.key) 
-
-typedef int HNode; // 힙에 저장할 항목의 자료형
-#define Key(n) (n) // 힙 노드 n의 키값
 HNode heap[MAX_HEAP_NODE]; // 배열을 이용해 구현한 힙(힙노드 배열)
 int heap_size; // 힙의 크기
 #define Parent(i) (heap[i/2]) // i의 부모 노드
@@ -121,6 +123,41 @@ int is_empty_heap() { return heap_size == 0; }
 int is_full_heap() { return (heap_size == MAX_HEAP_NODE - 1); }
 HNode find_heap() { return heap[1]; }
 
+void insert_heap(HNode n)
+{
+    int i;
+    if (is_full_heap()) return;
+    i = ++(heap_size);
+    while (i != 1 && Key(n) > Key(Parent(i))) 
+    {
+        heap[i] = Parent(i);
+        i /= 2;
+    }
+    heap[i] = n;
+}
+
+HNode delete_heap()
+{
+    HNode hroot, last;
+    int parent = 1, child = 2;
+    if (is_empty_heap())
+        error("힙 트리 공백 에러");
+    
+    hroot = heap[1];
+    last = heap[heap_size--];
+    while (child <= heap_size) 
+    {
+        if (child < heap_size && Key(Left(parent)) > Key(Right(parent)))
+            child++;
+        if (Key(last) <= Key(heap[child])) break;
+        heap[parent] = heap[child];
+        parent = child;
+        child *= 2;
+    }
+    heap[parent] = last;
+    
+    return hroot;
+}
 
 void Kruskal()
 {
@@ -130,7 +167,8 @@ void Kruskal()
     init_set(vsize);
     for (i = 0; i < vsize - 1; i++)
         for (j = i + 1; j < vsize; j++)
-            if (adj[i][j] < INF) {
+            if (adj[i][j] < INF) 
+            {
                 e.key = adj[i][j];
                 e.v1 = i;
                 e.v2 = j;
@@ -147,4 +185,11 @@ void Kruskal()
             edgeAccepted++;
         }
     }
+}
+
+int main()
+{
+    load_wgraph("graph.txt");
+    printf("MST By Kruskal's Algorithm\n");
+    Kruskal();
 }
