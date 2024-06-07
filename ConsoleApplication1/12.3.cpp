@@ -55,7 +55,23 @@ void insert_edge2(int u, int v, int val)
 
 void load_wgraph(char* filename) // 12.1
 {
-
+    int i, j, val, n;
+    char str[80];
+    FILE* fp = fopen(filename, "r");
+    if (fp != NULL)
+    {
+        init_graph();
+        fscanf(fp, "%d", &n);
+        insert_vertex(str[0]);
+        for (j = 0; j < n; j++)
+        {
+            fscanf(fp, "%d", &val);
+            if (i != j && val == 0)
+                adj[i][j] = INF;
+            else adj[i][j] = val;
+        }
+    }
+    fclose(fp);
 }
 
 // Union-Find 연산 관련 코드
